@@ -2,7 +2,7 @@ import type { Config } from 'tailwindcss';
 
 export default {
 	darkMode: ['class'],
-	content: ['./app/**/{**,.client,.server}/**/*.{js,jsx,ts,tsx}'],
+	content: ['./app/**/*.{js,jsx,ts,tsx}'],
 	theme: {
 		extend: {
 			fontFamily: {
@@ -63,6 +63,11 @@ export default {
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))',
 				},
+			},
+			screens: {
+				'2xl': '1536px',
+				'3xl': '1800px',
+				'4xl': '2100px',
 			},
 		},
 	},

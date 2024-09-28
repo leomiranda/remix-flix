@@ -86,6 +86,8 @@ export default function MainPage() {
 			? videoData
 			: videoData.filter((video) => video.category === selectedCategory);
 
+	const hasMoreItems = categories.length > 11;
+
 	return (
 		<div className="min-h-screen bg-gray-900 text-white">
 			<header className="px-4 lg:px-6 h-16 flex items-center fixed w-full bg-gray-900 z-10">
@@ -94,64 +96,83 @@ export default function MainPage() {
 					<span className="ml-2 text-2xl font-bold text-red-600">EduFlix</span>
 				</Link>
 				<nav className="ml-6 flex gap-2 sm:gap-4 items-center overflow-x-auto">
-					{categories.slice(0, 3).map((category) => (
+					{categories.map((category, index) => (
 						<Button
 							key={category}
 							variant="ghost"
 							className={`text-sm ${
 								selectedCategory === category ? 'text-white' : 'text-gray-400'
-							} whitespace-nowrap`}
+							} whitespace-nowrap ${
+								index === 0
+									? ''
+									: index < 3
+									? 'hidden md:inline-flex'
+									: index < 5
+									? 'hidden lg:inline-flex'
+									: index < 7
+									? 'hidden xl:inline-flex'
+									: index < 9
+									? 'hidden 2xl:inline-flex'
+									: index < 11
+									? 'hidden 3xl:inline-flex'
+									: 'hidden'
+							}`}
 							onClick={() => setSelectedCategory(category)}
 						>
 							{category}
 						</Button>
 					))}
-					<div className="hidden sm:block">
-						{categories.slice(3, 5).map((category) => (
-							<Button
-								key={category}
-								variant="ghost"
-								className={`text-sm ${
-									selectedCategory === category ? 'text-white' : 'text-gray-400'
-								} whitespace-nowrap`}
-								onClick={() => setSelectedCategory(category)}
-							>
-								{category}
-							</Button>
-						))}
-					</div>
-					<div className="hidden md:block">
-						{categories.slice(5, 7).map((category) => (
-							<Button
-								key={category}
-								variant="ghost"
-								className={`text-sm ${
-									selectedCategory === category ? 'text-white' : 'text-gray-400'
-								} whitespace-nowrap`}
-								onClick={() => setSelectedCategory(category)}
-							>
-								{category}
-							</Button>
-						))}
-					</div>
-					<DropdownMenu>
-						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" className="text-sm text-gray-400">
-								More <ChevronDown className="ml-1 h-4 w-4" />
-							</Button>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent className="bg-gray-800 border-gray-700">
-							{categories.slice(3).map((category) => (
-								<DropdownMenuItem
-									key={category}
-									className="text-sm text-gray-300 hover:text-white focus:text-white focus:bg-gray-700"
-									onClick={() => setSelectedCategory(category)}
-								>
-									{category}
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
+					{(hasMoreItems || categories.length > 1) && (
+						<div
+							className={`
+							${categories.length <= 1 ? 'hidden' : ''}
+							${categories.length <= 3 ? 'md:hidden' : ''}
+							${categories.length <= 5 ? 'lg:hidden' : ''}
+							${categories.length <= 7 ? 'xl:hidden' : ''}
+							${categories.length <= 9 ? '2xl:hidden' : ''}
+							${categories.length <= 11 ? '3xl:hidden' : ''}
+						`}
+						>
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="ghost"
+										className="text-sm text-gray-400 inline-flex"
+									>
+										{/* Use 'Categories' on mobile, 'More' on larger screens */}
+										<span className="md:hidden">Categories</span>
+										<span className="hidden md:inline">More</span>
+										<ChevronDown className="ml-1 h-4 w-4" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent className="bg-gray-800 border-gray-700">
+									{categories.map((category, index) => (
+										<DropdownMenuItem
+											key={category}
+											className={`text-sm text-gray-300 hover:text-white focus:text-white focus:bg-gray-700 ${
+												index === 0
+													? 'hidden'
+													: index < 3
+													? 'md:hidden'
+													: index < 5
+													? 'lg:hidden'
+													: index < 7
+													? 'xl:hidden'
+													: index < 9
+													? '2xl:hidden'
+													: index < 11
+													? '3xl:hidden'
+													: ''
+											}`}
+											onClick={() => setSelectedCategory(category)}
+										>
+											{category}
+										</DropdownMenuItem>
+									))}
+								</DropdownMenuContent>
+							</DropdownMenu>
+						</div>
+					)}
 				</nav>
 				<div className="ml-auto flex items-center gap-4">
 					<form className="relative hidden sm:block">
