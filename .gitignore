@@ -3,3 +3,7 @@ node_modules
 /.cache
 /build
 .env
+
+# Prisma
+prisma/migrations
+prisma/dev.db

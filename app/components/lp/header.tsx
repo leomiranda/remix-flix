@@ -1,4 +1,4 @@
-import { Link } from '@remix-run/react';
+import { Form, Link } from '@remix-run/react';
 import { Button } from '~/components/ui/button';
 import { BookOpen } from 'lucide-react';
 
@@ -28,9 +28,11 @@ export function Header() {
 				>
 					About
 				</Link>
-				<Button variant="outline" className="ml-4">
-					Login
-				</Button>
+				<Form action="/auth/google" method="post">
+					<Button variant="outline" className="ml-4">
+						Login
+					</Button>
+				</Form>
 			</nav>
 		</header>
 	);
