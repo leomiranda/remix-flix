@@ -1,4 +1,4 @@
-import { Form } from '@remix-run/react';
+import { Link } from '@remix-run/react';
 import { Button } from '~/components/ui/button';
 
 export function HeroSection() {
@@ -16,7 +16,7 @@ export function HeroSection() {
 						</p>
 					</div>
 					<div className="w-full max-w-sm space-y-2">
-						<Form action="/auth/google" method="post">
+						<Link to="/auth/login" className="ml-4">
 							<Button
 								className="w-full bg-white text-black hover:bg-gray-200"
 								size="lg"
@@ -33,7 +33,7 @@ export function HeroSection() {
 								</svg>
 								Sign in with Google
 							</Button>
-						</Form>
+						</Link>
 						<p className="text-xs text-gray-400">
 							By signing in, you agree to our Terms of Service and Privacy
 							Policy.

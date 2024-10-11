@@ -1,9 +1,17 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/utils/auth.server';
 
-export async function loader({ request }: LoaderFunctionArgs) {
-	return authenticator.authenticate('google', request, {
+export const loader = async ({
+	request,
+	params,
+	context,
+}: LoaderFunctionArgs) => {
+	const { provider } = params;
+
+	return await authenticator.authenticate(provider as string, request, {
 		successRedirect: '/play',
-		failureRedirect: '/',
+		failureRedirect: '/auth/login',
+		throwOnError: true,
+		context,
 	});
-}
+};
