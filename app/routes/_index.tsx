@@ -1,4 +1,6 @@
-import type { MetaFunction } from '@remix-run/node';
+import type { MetaFunction, LoaderFunction } from '@remix-run/node';
+import { json } from '@remix-run/node';
+import { db } from '~/utils/db.server';
 import { Header } from '~/components/lp/header';
 import { HeroSection } from '~/components/lp/hero-section';
 import { CategoriesSection } from '~/components/lp/categories-section';
@@ -8,9 +10,14 @@ import { Footer } from '~/components/lp/footer';
 
 export const meta: MetaFunction = () => {
 	return [
-		{ title: 'New Remix App' },
-		{ name: 'description', content: 'Welcome to Remix!' },
+		{ title: 'EduFlix - Online Learning Platform' },
+		{ name: 'description', content: 'Learn from thousands of online courses' },
 	];
+};
+
+export const loader: LoaderFunction = async () => {
+	const plans = await db.plan.findMany();
+	return json({ plans });
 };
 
 export default function Index() {

@@ -14,10 +14,42 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  email    String @unique
-  imageUrl String
-  username String @unique
+  id              String        @id @default(uuid())
+  email           String        @unique
+  imageUrl        String
+  username        String        @unique
+  ioPayCustomerId String?       @unique
+  subscription    Subscription?
+  createdAt       DateTime      @default(now())
+  Transaction     Transaction[]
+}
 
-  createdAt DateTime @default(now())
+model Plan {
+  id            String         @id @default(uuid())
+  name          String
+  price         Float
+  description   String
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id        String    @id @default(uuid())
+  userId    String    @unique
+  user      User      @relation(fields: [userId], references: [id])
+  planId    String
+  plan      Plan      @relation(fields: [planId], references: [id])
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+  status    String
+}
+
+model Transaction {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  amount        Float
+  status        String
+  paymentMethod String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
