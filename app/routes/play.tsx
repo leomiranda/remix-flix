@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs } from '@remix-run/node';
+import { json, LoaderFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/utils/auth.server';
 import { Header } from '~/components/play/header';
 import { VideoList } from '~/components/play/video-list';
@@ -7,11 +7,11 @@ import { categories, videoData } from '~/data/play';
 import { useState } from 'react';
 
 export async function loader({ request }: LoaderFunctionArgs) {
-	await authenticator.isAuthenticated(request, {
+	const user = await authenticator.isAuthenticated(request, {
 		failureRedirect: '/',
 	});
 
-	return {};
+	return json({ user });
 }
 
 export default function MainPage() {
