@@ -1,6 +1,6 @@
 import type { MetaFunction, LoaderFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { db } from '~/utils/db.server';
+import { prisma } from '~/utils/db.server';
 import { Header } from '~/components/lp/header';
 import { HeroSection } from '~/components/lp/hero-section';
 import { CategoriesSection } from '~/components/lp/categories-section';
@@ -16,7 +16,7 @@ export const meta: MetaFunction = () => {
 };
 
 export const loader: LoaderFunction = async () => {
-	const plans = await db.plan.findMany();
+	const plans = await prisma.plan.findMany();
 	return json({ plans });
 };
 

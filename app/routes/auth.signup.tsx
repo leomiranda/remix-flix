@@ -1,26 +1,30 @@
 import {
 	json,
 	LoaderFunctionArgs,
+	redirect,
 	type ActionFunctionArgs,
 } from '@remix-run/node';
 import { Form, useActionData } from '@remix-run/react';
 import { z } from 'zod';
 import { Button } from '~/components/ui/button';
-import { authenticator, login } from '~/utils/auth.server';
-import {
-	getFormProps,
-	getInputProps,
-	SubmissionResult,
-	useForm,
-} from '@conform-to/react';
+import { authenticator, signup } from '~/utils/auth.server';
+import { getFormProps, getInputProps, useForm } from '@conform-to/react';
 import { getZodConstraint, parseWithZod } from '@conform-to/zod';
 import { ErrorList, Field } from '~/components/Forms';
 
-const LoginFormSchema = z.object({
-	email: z.string().email('Invalid email address'),
-	password: z.string().min(8, 'Password must be at least 8 characters'),
-	redirectTo: z.string().optional(),
-});
+const SignupFormSchema = z
+	.object({
+		email: z.string().email('Invalid email address'),
+		password: z.string().min(8, 'Password must be at least 8 characters'),
+		confirmPassword: z
+			.string()
+			.min(8, 'Password must be at least 8 characters'),
+		name: z.string().min(3, 'Name must be at least 3 characters'),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Passwords don't match",
+		path: ['confirmPassword'],
+	});
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	await authenticator.isAuthenticated(request, {
@@ -29,20 +33,19 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	return null;
 };
 
-export const action = async ({ request, context }: ActionFunctionArgs) => {
-	const clonedRequest = request.clone();
-	const formData = await clonedRequest.formData();
+export const action = async ({ request }: ActionFunctionArgs) => {
+	const formData = await request.formData();
 
 	const submission = await parseWithZod(formData, {
 		schema: (intent) =>
-			LoginFormSchema.transform(async (data, ctx) => {
+			SignupFormSchema.transform(async (data, ctx) => {
 				if (intent !== null) return { ...data, session: null };
 
-				const session = await login(data);
+				const session = await signup(data);
 				if (!session) {
 					ctx.addIssue({
 						code: z.ZodIssueCode.custom,
-						message: 'Invalid email or password',
+						message: 'Failed to create account',
 					});
 					return z.NEVER;
 				}
@@ -54,30 +57,26 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
 	if (submission.status !== 'success' || !submission.value.session) {
 		return json(
-			{ result: submission.reply({ hideFields: ['password'] }) },
+			{
+				result: submission.reply({
+					hideFields: ['password', 'confirmPassword'],
+				}),
+			},
 			{ status: submission.status === 'error' ? 400 : 200 }
 		);
 	}
 
-	const authResult = await authenticator.authenticate('form', request, {
-		successRedirect: '/play',
-		failureRedirect: '/auth/login',
-		throwOnError: true,
-		context,
-	});
-
-	return json({ authResult });
+	return redirect('/auth/login');
 };
 
-export default function Login() {
+export default function Signup() {
 	const actionData = useActionData<typeof action>();
-
 	const [form, fields] = useForm({
-		id: 'login-form',
-		constraint: getZodConstraint(LoginFormSchema),
-		lastResult: (actionData as { result?: SubmissionResult<string[]> })?.result,
+		id: 'signup-form',
+		constraint: getZodConstraint(SignupFormSchema),
+		lastResult: actionData?.result,
 		onValidate({ formData }) {
-			return parseWithZod(formData, { schema: LoginFormSchema });
+			return parseWithZod(formData, { schema: SignupFormSchema });
 		},
 		shouldRevalidate: 'onBlur',
 	});
@@ -86,42 +85,51 @@ export default function Login() {
 		<div className="flex min-h-screen items-center justify-center bg-gray-100">
 			<div className="w-full max-w-md space-y-8 rounded-lg bg-white p-8 shadow-md">
 				<h2 className="text-center text-3xl font-extrabold text-gray-900">
-					Sign in to your account
+					Create your account
 				</h2>
 				<Form {...getFormProps(form)} method="post" className="mt-8 space-y-6">
 					<div className="space-y-4 rounded-md shadow-sm">
-						<div>
-							<Field
-								labelProps={{ children: 'Email' }}
-								inputProps={{
-									...getInputProps(fields.email, { type: 'email' }),
-									autoFocus: true,
-									className: 'lowercase',
-									autoComplete: 'email',
-								}}
-								errors={fields.email.errors}
-							/>
-						</div>
-						<div>
-							<Field
-								labelProps={{ children: 'Password' }}
-								inputProps={{
-									...getInputProps(fields.password, {
-										type: 'password',
-									}),
-									autoComplete: 'current-password',
-								}}
-								errors={fields.password.errors}
-							/>
-						</div>
+						<Field
+							labelProps={{ children: 'Email' }}
+							inputProps={{
+								...getInputProps(fields.email, { type: 'email' }),
+								autoFocus: true,
+								className: 'lowercase',
+								autoComplete: 'email',
+							}}
+							errors={fields.email.errors}
+						/>
+						<Field
+							labelProps={{ children: 'Name' }}
+							inputProps={{
+								...getInputProps(fields.name, { type: 'text' }),
+								autoComplete: 'name',
+							}}
+							errors={fields.name.errors}
+						/>
+						<Field
+							labelProps={{ children: 'Password' }}
+							inputProps={{
+								...getInputProps(fields.password, { type: 'password' }),
+								autoComplete: 'new-password',
+							}}
+							errors={fields.password.errors}
+						/>
+						<Field
+							labelProps={{ children: 'Confirm Password' }}
+							inputProps={{
+								...getInputProps(fields.confirmPassword, { type: 'password' }),
+								autoComplete: 'new-password',
+							}}
+							errors={fields.confirmPassword.errors}
+						/>
 					</div>
 
-					<input {...getInputProps(fields.redirectTo, { type: 'hidden' })} />
 					<ErrorList errors={form.errors} id={form.errorId} />
 
 					<div>
 						<Button type="submit" className="w-full">
-							Sign in
+							Sign up
 						</Button>
 					</div>
 				</Form>
@@ -156,12 +164,12 @@ export default function Login() {
 				</div>
 				<div className="mt-6 text-center">
 					<span className="text-sm text-gray-600">
-						Don&apos;t have an account?{' '}
+						Already have an account?{' '}
 						<a
-							href="/auth/signup"
+							href="/auth/login"
 							className="font-medium text-indigo-600 hover:text-indigo-500"
 						>
-							Sign up
+							Sign in
 						</a>
 					</span>
 				</div>

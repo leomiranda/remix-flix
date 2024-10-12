@@ -1,13 +1,13 @@
 import { json } from '@remix-run/node';
 import { useLoaderData, useNavigate, Form } from '@remix-run/react';
-import { db } from '~/utils/db.server';
+import { prisma } from '~/utils/db.server';
 import { Button } from '~/components/ui/button';
 import type { LoaderFunctionArgs } from '@remix-run/node';
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const url = new URL(request.url);
 	const selectedPlanId = url.searchParams.get('planId');
-	const plans = await db.plan.findMany();
+	const plans = await prisma.plan.findMany();
 
 	return json({ plans, selectedPlanId });
 };
