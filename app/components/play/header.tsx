@@ -58,8 +58,10 @@ export function Header({
 						<DropdownMenuLabel>My Account</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem>
-							<User className="mr-2 h-4 w-4" />
-							<span>Profile</span>
+							<Link to="/user/edit" className="flex items-center w-full">
+								<User className="mr-2 h-4 w-4" />
+								<span>Profile</span>
+							</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem>
 							<Link to="/plans" className="flex items-center w-full">

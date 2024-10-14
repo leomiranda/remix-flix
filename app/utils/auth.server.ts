@@ -135,3 +135,9 @@ export async function createSession(userId: string) {
 	});
 	return session;
 }
+
+export async function updateUser(userId: string, data: Partial<User>) {
+	const user = await prisma.user.update({ where: { id: userId }, data });
+	console.log('🚀 ~ updateUser ~ user:', user);
+	return user;
+}
